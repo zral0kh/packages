@@ -9,7 +9,7 @@
     type(namespace) == str,
     message: "Namespace passed to `disable-warnings` must be a string.",
   )
-  state(namespace).update(0)
+  state(namespace).update(false)
 }
 /// Enables warnings emitted under the namespace `namespace`.
 /// Use like: `#enable-warnings("font-warnings")`
@@ -22,7 +22,7 @@
     type(namespace) == str,
     message: "Namespace passed to `enable-warnings` must be a string.",
   )
-  state(namespace).update(1)
+  state(namespace).update(true)
 }
 
 #let register-namespace(namespace) = context {
@@ -37,7 +37,7 @@
         + "' is already registered by some other package. Please choose a different namespace to avoid collisions.",
     )
   }
-  state(namespace).update(1)
+  state(namespace).update(true)
 }
 
 #let delete-font-warning = range(21).map(i => "\u{0008}").sum()
@@ -51,7 +51,7 @@
 /// - message (str): The warning message.
 /// -> content
 #let warning(namespace: "cstm", prefix: "[custom] ", message) = context {
-  let message = if state(namespace, 1).get() == 1 {
+  let message = if state(namespace, true).get() {
     delete-font-warning + prefix + message
   } else {
     "libertinus serif"
@@ -60,7 +60,7 @@
 }
 
 #let debug(namespace: "cstm", prefix: "[custom] ", message) = context {
-  let message = if state(namespace, 1).get() == 1 {
+  let message = if state(namespace, true).get() {
     message
   } else {
     "libertinus serif"
