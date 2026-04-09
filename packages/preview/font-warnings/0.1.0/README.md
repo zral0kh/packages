@@ -2,9 +2,10 @@
 
 A tiny Typst utility for package authors who want to surface custom warnings, while still allowing users to disable those warnings by namespace.
 
-This package exposes three functions:
+This package exposes four functions:
 
 - `warning` to emit a warning message.
+- `register-namespace` to register a warning namespace, panics if it has already been registered.
 - `disable-warnings` to suppress warnings for one namespace.
 - `enable-warnings` to re-enable warnings for one namespace.
 
