@@ -6,7 +6,7 @@
 /// -> function
 #let disable-warnings(namespace) = {
   assert(
-    type(namespace) == str ,
+    type(namespace) == str,
     message: "Namespace passed to `disable-warnings` must be a string.",
   )
   state(namespace).update(0)
@@ -25,16 +25,20 @@
   state(namespace).update(1)
 }
 
-#let register-namespace(namespace) = context{
+#let register-namespace(namespace) = context {
   assert(
     type(namespace) == str,
     message: "Namespace passed to `register-namespace` must be a string.",
   )
   if state(namespace).get() != none {
-    panic("Namespace '" + namespace + "' is already registered by some other package. Please choose a different namespace to avoid collisions.")
+    panic(
+      "Warning namespace '"
+        + namespace
+        + "' is already registered by some other package. Please choose a different namespace to avoid collisions.",
+    )
   }
   state(namespace).update(1)
-} 
+}
 
 #let delete-font-warning = range(21).map(i => "\u{0008}").sum()
 /// Display a warning message with `set text(font: ..)` magic.
