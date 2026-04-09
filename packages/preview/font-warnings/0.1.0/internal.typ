@@ -2,7 +2,7 @@
 /// Use like: `#disable-warnings("font-warnings")`
 /// To enable warnings, use the `enable-warnings` function with the same namespace.
 ///
-/// - namespace (str): The namespace for which to disable warnings. Only 4 characters may be used.
+/// - namespace (str): The namespace for which to disable warnings.
 /// -> function
 #let disable-warnings(namespace) = {
   assert(
@@ -15,7 +15,7 @@
 /// Use like: `#enable-warnings("font-warnings")`
 /// To disable warnings, use the `disable-warnings` function with the same namespace.
 ///
-/// - namespace (str): The namespace for which to enable warnings. Only 4 characters may be used.
+/// - namespace (str): The namespace for which to enable warnings.
 /// -> function
 #let enable-warnings(namespace) = {
   assert(
@@ -24,6 +24,17 @@
   )
   state(namespace).update(1)
 }
+
+#let register-namespace(namespace) = context{
+  assert(
+    type(namespace) == str,
+    message: "Namespace passed to `register-namespace` must be a string.",
+  )
+  if state(namespace).get() != none {
+    panic("Namespace '" + namespace + "' is already registered by some other package. Please choose a different namespace to avoid collisions.")
+  }
+  state(namespace).update(1)
+} 
 
 #let delete-font-warning = range(21).map(i => "\u{0008}").sum()
 /// Display a warning message with `set text(font: ..)` magic.

@@ -29,20 +29,21 @@ Otherwise:
 ## Quick start
 
 ```typst
-#import "@preview/font-warnings:0.1.0": *
+#import "@preview/font-warnings:0.1.0" as fwrn
 
 #let ns = "your-package"
-#let pkg-warning = warning.with(namespace: ns, prefix: "[yr-pkg] ")
+#fwrn.register-namespace(ns) // will panic if already registered by another package
+#let pkg-warning = fwrn.warning.with(namespace: ns, prefix: "[yr-pkg] ")
 
 // Visible by default
 #pkg-warning("Unsupported option \"foo\"; falling back to default.")
 
 // Disable all warnings in this namespace
-#disable-warnings(ns)
+#fwrn.disable-warnings(ns)
 #pkg-warning("This will not be shown.")
 
 // Re-enable later
-#enable-warnings(ns)
+#fwrn.enable-warnings(ns)
 #pkg-warning("Warnings are visible again.")
 ```
 
@@ -58,6 +59,19 @@ Emits a warning-like message.
 - returns: `content`
 
 Use `warning.with(...)` to create a package-local warning function with fixed namespace and prefix.
+
+### `register-namespace(namespace)`
+
+Registers a namespace and panics if the same namespace has already been registered.
+It is good practice to register your namespace, but not necessary for warnings to work.
+
+- `namespace` (`str`): Your chosen namespace string.
+
+Usage:
+
+```typst
+#register-namespace("font-warnings")
+```
 
 ### `disable-warnings(namespace)`
 
@@ -86,6 +100,7 @@ Usage:
 ## Namespace rules and other Caveats
 
 - Choose a namespace that won't collide with other packages': e.g. your own package-name.
+- It is good practice to register your namespace so you can be sure nothing collides. Note, that because of the way state works, the package that gets imported last will cause the panic, thus it might not be your fault that another package's namespace collides with yours.
 - Warnings are enabled by default.
 - The source location reported by Typst will generally point to the warning function internals, not the original call site. Include enough context in your message to make debugging easy.
 - Because of the way typst handles warnings, they are automatically deduped if the code location and the message is the same. If you want to emit a warning more than just once, you need to change the message.
@@ -97,7 +112,9 @@ Usage:
 
 ```typst
 //my-package/internals.typ
-#import "@preview/font-warnings:0.1.0": warning, disable-warnings, enable-warnings
+#import "@preview/font-warnings:0.1.0": warning, disable-warnings, enable-warnings, register-namespace
+//register first
+#register-namespace("your-package")
 //use internally
 #let warning = warning.with(namespace: "your-package", prefix: "[your-package] ")
 //expose these
