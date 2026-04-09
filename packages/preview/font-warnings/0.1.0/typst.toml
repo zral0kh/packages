@@ -9,3 +9,6 @@ repository = "https://github.com/fornings-typ/font-warnings"
 keywords = ["warning", "illegal"]
 categories = ["utility"]
 compiler = "0.14.2"
+
+[tool.tytanic]
+default.ppi = 72

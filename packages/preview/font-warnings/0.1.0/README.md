@@ -31,28 +31,28 @@ Otherwise:
 ```typst
 #import "@preview/font-warnings:0.1.0": *
 
-#let ns = "mpkg"
-#let pkg-warning = warning.with(namespace: ns, prefix: "[my-pkg] ")
+#let ns = "your-package"
+#let pkg-warning = warning.with(namespace: ns, prefix: "[yr-pkg] ")
 
 // Visible by default
 #pkg-warning("Unsupported option \"foo\"; falling back to default.")
 
 // Disable all warnings in this namespace
-#show: disable-warnings(ns)
+#disable-warnings(ns)
 #pkg-warning("This will not be shown.")
 
 // Re-enable later
-#show: enable-warnings(ns)
+#enable-warnings(ns)
 #pkg-warning("Warnings are visible again.")
 ```
 
 ## API
 
-### `warning(namespace: "cstm", prefix: "[custom] ", message)`
+### `warning(namespace: "font-warnings", prefix: "[custom] ", message)`
 
 Emits a warning-like message.
 
-- `namespace` (`str`): Warning namespace used for on/off control. Must be at most 4 characters. And you cannot choose just any, see [here](#namespace-rules-and-caveats).
+- `namespace` (`str`): Warning namespace used for on/off control. Choose carefully to avoid collisions.
 - `prefix` (`str`): Prefix prepended to the warning text.
 - `message` (`str`): Warning body.
 - returns: `content`
@@ -61,54 +61,56 @@ Use `warning.with(...)` to create a package-local warning function with fixed na
 
 ### `disable-warnings(namespace)`
 
-Returns a function to use in a show rule, that disables warnings for the given namespace.
+Disables warnings for the given namespace.
 
-- `namespace` (`str`): Must be at most 4 characters.
-- returns: `function`
+- `namespace` (`str`): Your chosen namespace string.
 
 Usage:
 
 ```typst
-#show: disable-warnings("fwrn")
+#disable-warnings("font-warnings")
 ```
 
 ### `enable-warnings(namespace)`
 
-Returns a function to use in a show rule, that enables warnings for the given namespace.
+Enables warnings for the given namespace.
 
-- `namespace` (`str`): Must be at most 4 characters.
-- returns: `function`
+- `namespace` (`str`): Your chosen namespace string.
 
 Usage:
 
 ```typ
-#show: enable-warnings("fwrn")
+#enable-warnings("font-warnings")
 ```
 
 ## Namespace rules and other Caveats
 
-- Namespaces must be strings of length `<= 4`.
-- Namespace keys are stored in `text.features`; choose values that do not collide with real OpenType feature tags. Check https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist before deciding on one.
+- Choose a namespace that won't collide with other packages': e.g. your own package-name.
 - Warnings are enabled by default.
 - The source location reported by Typst will generally point to the warning function internals, not the original call site. Include enough context in your message to make debugging easy.
+- Because of the way typst handles warnings, they are automatically deduped if the code location and the message is the same. If you want to emit a warning more than just once, you need to change the message.
 
 ## Best practices for package authors
 
-- Reserve one namespace per package, for example `"mpkg"`.
+- Reserve one namespace per package, for example `"your-package"`.
 - Bind the warning utils into your package:
 
 ```typst
 //my-package/internals.typ
 #import "@preview/font-warnings:0.1.0": warning, disable-warnings, enable-warnings
 //use internally
-#let warning = warning.with(namespace: "mpkg", prefix: "[my-package] ")
+#let warning = warning.with(namespace: "your-package", prefix: "[your-package] ")
 //expose these
-#let disable-warnings = disable-warnings.with("mpkg")
-#let enable-warnings = enable-warnings.with("mpkg")
+#let disable-warnings = disable-warnings.with("your-package")
+#let enable-warnings = enable-warnings.with("your-package")
 
 //user-doc
-#import "@preview/my-package:0.1.0" as mpkg
-#show: mpkg.disable-warnings
+#import "@preview/your-package:0.1.0" as ypkg
+#ypkg.disable-warnings
+//and users can also disable if they import font-warnings directly
+//but this only works when you choose the namespace to be your packages name. 
+#import "@preview/font-warnings:0.1.0" as warnings
+#warnings.disable("your-package") 
 ```
 
 - Keep warning messages actionable: explain what happened, where, and how to fix it.
