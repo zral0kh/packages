@@ -1,4 +1,4 @@
-# font-warnings
+# uniwarn
 
 A tiny Typst utility for package authors who want to surface custom warnings, while still allowing users to disable those warnings by namespace.
 
@@ -11,46 +11,46 @@ This package exposes four functions:
 
 ## Why this exists
 
-Typst currently has no package-level diagnostics hooks. `font-warnings` uses a small `set text(...)` trick to inject warning messages, and allows package users to opt out when they already understand the warning.
+Typst currently has no package-level diagnostics hooks. `uniwarn` uses a small `set text(...)` trick to inject warning messages, and allows package users to opt out when they already understand the warning.
 
 ## Installation
 
 If installed as a local package, import from the package root:
 
 ```typst
-#import "@local/font-warnings:0.1.0": warning, disable-warnings, enable-warnings
+#import "@local/uniwarn:0.1.0": warning, disable-warnings, enable-warnings
 ```
 
 Otherwise:
 
 ```typst
-#import "@preview/font-warnings:0.1.0": warning, disable-warnings, enable-warnings
+#import "@preview/uniwarn:0.1.0": warning, disable-warnings, enable-warnings
 ```
 
 ## Quick start
 
 ```typst
-#import "@preview/font-warnings:0.1.0" as fwrn
+#import "@preview/uniwarn:0.1.0" as uwarn
 
 #let ns = "your-package"
-#fwrn.register-namespace(ns) // will panic if already registered by another package
-#let pkg-warning = fwrn.warning.with(namespace: ns, prefix: "[yr-pkg] ")
+#uwarn.register-namespace(ns) // will panic if already registered by another package
+#let pkg-warning = uwarn.warning.with(namespace: ns, prefix: "[yr-pkg] ")
 
 // Visible by default
 #pkg-warning("Unsupported option \"foo\"; falling back to default.")
 
 // Disable all warnings in this namespace
-#fwrn.disable-warnings(ns)
+#uwarn.disable-warnings(ns)
 #pkg-warning("This will not be shown.")
 
 // Re-enable later
-#fwrn.enable-warnings(ns)
+#uwarn.enable-warnings(ns)
 #pkg-warning("Warnings are visible again.")
 ```
 
 ## API
 
-### `warning(namespace: "font-warnings", prefix: "[custom] ", message)`
+### `warning(namespace: "cstm", prefix: "[custom] ", message)`
 
 Emits a warning-like message.
 
@@ -71,7 +71,7 @@ It is good practice to register your namespace, but not necessary for warnings t
 Usage:
 
 ```typst
-#register-namespace("font-warnings")
+#register-namespace("uniwarn")
 ```
 
 ### `disable-warnings(namespace)`
@@ -83,7 +83,7 @@ Disables warnings for the given namespace.
 Usage:
 
 ```typst
-#disable-warnings("font-warnings")
+#disable-warnings("uniwarn")
 ```
 
 ### `enable-warnings(namespace)`
@@ -95,13 +95,13 @@ Enables warnings for the given namespace.
 Usage:
 
 ```typ
-#enable-warnings("font-warnings")
+#enable-warnings("uniwarn")
 ```
 
 ## Namespace rules and other Caveats
 
 - Choose a namespace that won't collide with other packages': e.g. your own package-name.
-- It is good practice to register your namespace so you can be sure nothing collides. Note, that because of the way state works, the package that gets imported last will cause the panic, thus it might not be your fault that another package's namespace collides with yours.
+- It is good practice to register your namespace so you can be sure nothing collides. Note that because of the way typst state works, the package that gets imported last will cause the panic, thus it might not be your fault that another package's namespace collides with yours.
 - Warnings are enabled by default.
 - The source location reported by Typst will generally point to the warning function internals, not the original call site. Include enough context in your message to make debugging easy.
 - Because of the way typst handles warnings, they are automatically deduped if the code location and the message is the same. If you want to emit a warning more than just once, you need to change the message.
@@ -113,7 +113,7 @@ Usage:
 
 ```typst
 //my-package/internals.typ
-#import "@preview/font-warnings:0.1.0": warning, disable-warnings, enable-warnings, register-namespace
+#import "@preview/uniwarn:0.1.0": warning, disable-warnings, enable-warnings, register-namespace
 //register first
 #register-namespace("your-package")
 //use internally
@@ -125,14 +125,15 @@ Usage:
 //user-doc
 #import "@preview/your-package:0.1.0" as ypkg
 #ypkg.disable-warnings
-//and users can also disable if they import font-warnings directly
+//and users can also disable if they import uniwarn directly
 //but this only works when you choose the namespace to be your packages name. 
-#import "@preview/font-warnings:0.1.0" as warnings
+#import "@preview/uniwarn:0.1.0" as warnings
 #warnings.disable("your-package") 
 ```
 
 - Keep warning messages actionable: explain what happened, where, and how to fix it.
 - Explain how users should use the warning utils you expose.
+
 ## License
 
 MIT
